@@ -374,7 +374,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           Flexible(
                             flex: 5,
-                            child: Placeholder(),
+                            child: ListView(
+                              children: const <Widget>[
+                                ListTile(title: Text('1  Hot Meal Adult'), trailing: Icon(Icons.delete),),
+                                ListTile(title: Text('1  Soup Adult'), trailing: Icon(Icons.delete),),
+                                ListTile(title: Text('2  Hot Meal Child'), trailing: Icon(Icons.delete),),
+                              ],
+                            ),
                           )
                         ],
                       )
