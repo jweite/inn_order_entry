@@ -33,6 +33,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  final TextEditingController _scanTextFieldController = TextEditingController();
+  final TextEditingController _notesTextFieldController = TextEditingController();
+  int? adultAllowance;
+  int? childAllowance;
+  var purchaseCompletedSnackBar = SnackBar(
+    content: Text('Purchase completed'),
+    duration: const Duration(seconds: 1),
+  );
+
+  Map<String, int> order = <String, int>{};
+
+  void addItem(String item) {
+    if (order.containsKey(item)) {
+      order[item] = (order[item]! + 1);
+    }
+    else {
+      order[item] = 1;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
   final ThemeData theme = Theme.of(context);
@@ -65,22 +86,36 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Flexible(
               flex: 1,
-              child: Row(
+              child: Row( // TOP ROW
                 children: [
-                  Flexible(
+                  Flexible( // TOP LEFT REGION
                     flex: 1,
                     child: Column(
                       children: [
-                        Flexible(
+                        Flexible(  // TOP LEFT TOP: SCAN
                           flex: 1,
                           child: Container(
                             decoration: commmonBoxDecoration,
                             margin: EdgeInsets.all(5),
                             child: TextField(
+                              controller: _scanTextFieldController,
                               decoration: InputDecoration(
                                 hintText: 'Scan Guest Barcode',
-                                prefixIcon: Icon(Icons.person),
-                                suffixIcon: Icon(Icons.check_circle),
+                                prefixIcon: IconButton(
+                                  onPressed: () => (),
+                                  icon: Icon(Icons.person)
+                                ),
+                                suffixIcon: IconButton(
+                                  onPressed: () => {
+                                    _scanTextFieldController.text = "12345",
+                                    _notesTextFieldController.text = "Guest card expiring 6/1/25",
+                                    setState(() {
+                                      adultAllowance = 1; 
+                                      childAllowance = 3;
+                                    })
+                                  },
+                                  icon: Icon(Icons.check_circle)
+                                ),
                                 border: OutlineInputBorder(),
                                 enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(color: Colors.blue),
@@ -91,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),                            ),
                           )
                         ),
-                        Flexible(
+                        if (adultAllowance != null && childAllowance != null) Flexible( // TOP LEFT BOTTOM: ALLOWANCE
                           flex: 2,
                           child: Container(
                             constraints: BoxConstraints.expand(),
@@ -108,13 +143,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Center(
                                   child: Text(
                                     style: allowancesTextStyle,
-                                    "1 Adult",
+                                    (adultAllowance != null) ? "$adultAllowance Adult" : "",
                                   ),
                                 ),
                                 Center(
                                   child: Text(
                                     style: allowancesTextStyle,
-                                    "3 Children",
+                                    (childAllowance != null) ? "$childAllowance Child" : "",
                                   ),
                                 ),
                               ],
@@ -124,11 +159,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                     )
                   ),
-                  Flexible(
+                  Flexible( // TOP RIGHT REGION
                     flex: 3,
                     child: Column(
                       children: [
-                        Flexible(
+                        if (adultAllowance != null && childAllowance != null) Flexible( // NOTES
                           flex: 1,
                           child: Container(
                             constraints: BoxConstraints.expand(),
@@ -137,6 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Padding(
                               padding: const EdgeInsets.all(4.0),
                               child: TextField(
+                                controller: _notesTextFieldController,
                                 decoration: InputDecoration(
                                   hintText: 'Notes',
                                 ), 
@@ -152,12 +188,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               )
             ),
-            Flexible(
+            if (adultAllowance != null && childAllowance != null) Flexible(
               flex: 3,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(
+                  Flexible( // BOTTOM LEFT: ADULT ORDER BUTTONS
                     flex: 1,
                     fit: FlexFit.tight,
                     child: Container(
@@ -182,7 +218,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Hot Meal - Adult");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Hot Meal"),
                                 ),
                               )
@@ -192,7 +232,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Soup - Adult");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Soup"),
                                 ),
                               )
@@ -202,7 +246,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Ham Sandwich - Adult");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Ham Sandwich"),
                                 ),
                               )
@@ -212,7 +260,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Turkey Sandwich - Adult");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Turkey Sandwich"),
                                 ),
                               )
@@ -222,7 +274,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Roast Beef Sandwich - Adult");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Roast Beef Sandwich"),
                                 ),
                               )
@@ -232,7 +288,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Cheese Sandwich - Adult");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Cheese Sandwich"),
                                 ),
                               )
@@ -242,7 +302,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("PBJ Sandwich - Adult");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "PBJ Sandwich"),
                                 ),
                               )
@@ -252,7 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       )
                     )
                   ),
-                  Flexible(
+                  Flexible( // BOTTOM MIDDLE: CHILD ORDER BUTTONS
                     flex: 1,
                     fit: FlexFit.tight,
                     child: Container(
@@ -277,7 +341,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Hot Meal - Child");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Hot Meal"),
                                 ),
                               )
@@ -287,7 +355,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Ham Sandwich - Child");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Ham Sandwich"),
                                 ),
                               )
@@ -297,7 +369,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Turkey Sandwich - Child");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Turkey Sandwich"),
                                 ),
                               )
@@ -307,7 +383,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Roast Beef Sandwich - Child");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Roast Beef Sandwich"),
                                 ),
                               )
@@ -317,7 +397,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("Cheese Sandwich - Child");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "Cheese Sandwich"),
                                 ),
                               )
@@ -327,7 +411,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: EdgeInsets.all(10),
                                 child: ElevatedButton(
-                                  onPressed: () => {}, 
+                                  onPressed: () => {
+                                    setState(() {
+                                      addItem("PBJ Sandwich - Child");
+                                    })
+                                  }, 
                                   child: Text(style: commonTextStyle, "PBJ Sandwich"),
                                 ),
                               )
@@ -337,7 +425,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       )
                     )
                   ),
-                  Flexible(
+                  Flexible( // BOTTOM RIGHT: ORDER SUMMARY
                     flex: 1,
                     fit: FlexFit.tight,
                     child: Container(
@@ -355,7 +443,20 @@ class _MyHomePageState extends State<MyHomePage> {
                                   child: Container(
                                     margin: EdgeInsets.all(5),
                                     child: ElevatedButton(
-                                      onPressed: () => {}, 
+                                      onPressed: () => {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          purchaseCompletedSnackBar
+                                        ),
+                                        Future.delayed(const Duration(seconds: 1), () {
+                                          _notesTextFieldController.text = "";
+                                          _scanTextFieldController.text = "";
+                                          setState(() {
+                                            adultAllowance = null;
+                                            childAllowance = null;
+                                            order.clear();
+                                          });
+                                        })
+                                      }, 
                                       style: ButtonStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.blue)),
                                       child: Text(style: commonBlackTextStyle, "Purchase"),
                                     ),
@@ -364,7 +465,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Flexible(
                                   flex: 1,
                                   child: ElevatedButton(
-                                    onPressed: () => {}, 
+                                    onPressed: () => {
+                                        _notesTextFieldController.text = "",
+                                        _scanTextFieldController.text = "",
+                                        setState(() {
+                                          adultAllowance = null;
+                                          childAllowance = null;
+                                          order.clear();
+                                        })
+                                    }, 
                                     style: ButtonStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.grey)),
                                     child: Text(style: commonBlackTextStyle, "Cancel"),
                                   ),
@@ -375,10 +484,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Flexible(
                             flex: 5,
                             child: ListView(
-                              children: const <Widget>[
-                                ListTile(title: Text('1  Hot Meal Adult'), trailing: Icon(Icons.delete),),
-                                ListTile(title: Text('1  Soup Adult'), trailing: Icon(Icons.delete),),
-                                ListTile(title: Text('2  Hot Meal Child'), trailing: Icon(Icons.delete),),
+                              children: <Widget>[
+                                for (var entry in order.entries) ListTile(title: Text('${entry.value}  ${entry.key}'), trailing: Icon(Icons.delete),),
                               ],
                             ),
                           )
