@@ -54,6 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void deleteItem(String item) {
+    order.remove(item);
+  }
+
   @override
   Widget build(BuildContext context) {
   final ThemeData theme = Theme.of(context);
@@ -485,7 +489,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             flex: 5,
                             child: ListView(
                               children: <Widget>[
-                                for (var entry in order.entries) ListTile(title: Text('${entry.value}  ${entry.key}'), trailing: Icon(Icons.delete),),
+                                for (var entry in order.entries) ListTile(title: Text('${entry.value}  ${entry.key}'), trailing: IconButton(icon: Icon(Icons.delete), onPressed: () => {setState(() { deleteItem(entry.key);})},),),
                               ],
                             ),
                           )
