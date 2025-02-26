@@ -54,6 +54,14 @@ class _MyHomePageState extends State<MyHomePage> {
     "PBJ Sandwich",
   ];
 
+  List<Guest> demoGuests = [
+    Guest("12345", "Send to CTI for enrollment completion.", 1, 3),
+    Guest("23456", "Card expires 6/1/25.", 1, 0),
+    Guest("34567", "Awaiting health insurance paperwork.", 1, 1),
+  ];
+
+  int demoGuestRotationIndex = 0;
+
   final TextEditingController _scanTextFieldController = TextEditingController();
 
   final TextEditingController _notesTextFieldController = TextEditingController();
@@ -128,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   orderButtonBox("Adult", adultButtonLabels),
-                  orderButtonBox("Child", childButtonLabels),
+                  if (childAllowance! > 0) orderButtonBox("Child", childButtonLabels),
                   orderSummaryBox(context),
                 ],
               )
@@ -139,25 +147,43 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Flexible notesBox() {
-    return Flexible( // NOTES
+  Flexible scanGuestIdBox() {
+    return Flexible(  // TOP LEFT TOP: SCAN
       flex: 1,
       child: Container(
-        constraints: BoxConstraints.expand(),
         decoration: commmonBoxDecoration,
         margin: EdgeInsets.all(5),
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: TextField(
-            controller: _notesTextFieldController,
-            decoration: InputDecoration(
-              hintText: 'Notes',
-            ), 
-            expands: true,
-            maxLines: null,
-          ),
-        )
-      ),
+        child: TextField(
+          controller: _scanTextFieldController,
+          decoration: InputDecoration(
+            hintText: 'Scan Guest Barcode',
+            prefixIcon: IconButton(
+              onPressed: () => (),
+              icon: Icon(Icons.person)
+            ),
+            suffixIcon: IconButton(
+              onPressed: () {
+                if (adultAllowance == null) { // Used as flag to indicate order already in progress
+                  Guest guest = getNextGuest();
+                  _scanTextFieldController.text = guest.id;
+                  _notesTextFieldController.text = guest.notes;
+                  setState(() {
+                    adultAllowance = guest.adultAllowance; 
+                    childAllowance = guest.childAllowance;
+                  });
+                }
+              },
+              icon: Icon(Icons.check_circle)
+            ),
+            border: OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.green),
+            ),
+          ),                            ),
+      )
     );
   }
 
@@ -200,40 +226,25 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Flexible scanGuestIdBox() {
-    return Flexible(  // TOP LEFT TOP: SCAN
+  Flexible notesBox() {
+    return Flexible( // NOTES
       flex: 1,
       child: Container(
+        constraints: BoxConstraints.expand(),
         decoration: commmonBoxDecoration,
         margin: EdgeInsets.all(5),
-        child: TextField(
-          controller: _scanTextFieldController,
-          decoration: InputDecoration(
-            hintText: 'Scan Guest Barcode',
-            prefixIcon: IconButton(
-              onPressed: () => (),
-              icon: Icon(Icons.person)
-            ),
-            suffixIcon: IconButton(
-              onPressed: () => {
-                _scanTextFieldController.text = "12345",
-                _notesTextFieldController.text = "Guest card expiring 6/1/25",
-                setState(() {
-                  adultAllowance = 1; 
-                  childAllowance = 3;
-                })
-              },
-              icon: Icon(Icons.check_circle)
-            ),
-            border: OutlineInputBorder(),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.blue),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.green),
-            ),
-          ),                            ),
-      )
+        child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: TextField(
+            controller: _notesTextFieldController,
+            decoration: InputDecoration(
+              hintText: 'Notes',
+            ), 
+            expands: true,
+            maxLines: null,
+          ),
+        )
+      ),
     );
   }
 
@@ -356,4 +367,19 @@ class _MyHomePageState extends State<MyHomePage> {
       )
     );
   }
+
+  Guest getNextGuest() {
+    demoGuestRotationIndex = (demoGuestRotationIndex >= demoGuests.length - 1) ? 0 : demoGuestRotationIndex + 1;
+    return demoGuests[demoGuestRotationIndex];
+  }
+}
+
+class Guest {
+  String id;
+  String notes;
+  int adultAllowance;
+  int childAllowance;
+
+  Guest(this.id, this.notes, this.adultAllowance, this.childAllowance);
+
 }
