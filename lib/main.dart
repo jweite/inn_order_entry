@@ -268,18 +268,20 @@ class _MyHomePageState extends State<MyHomePage> {
                       margin: EdgeInsets.all(5),
                       child: ElevatedButton( 
                         onPressed: () => {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            purchaseCompletedSnackBar
-                          ),
-                          Future.delayed(const Duration(seconds: 1), () {
-                            _notesTextFieldController.text = "";
-                            _scanTextFieldController.text = "";
-                            setState(() {
-                              adultAllowance = null;
-                              childAllowance = null;
-                              order.clear();
-                            });
-                          })
+                          if (order.isNotEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              purchaseCompletedSnackBar
+                            ),
+                            Future.delayed(const Duration(seconds: 1), () {
+                              _notesTextFieldController.text = "";
+                              _scanTextFieldController.text = "";
+                              setState(() {
+                                adultAllowance = null;
+                                childAllowance = null;
+                                order.clear();
+                              });
+                            })
+                          }
                         }, 
                         style: ButtonStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.blue)),
                         child: Text(style: commonBlackTextStyle, "Purchase"),
