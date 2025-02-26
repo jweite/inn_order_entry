@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 void main() {
   runApp(const MyApp());
@@ -67,7 +68,14 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _notesTextFieldController = TextEditingController();
 
   var purchaseCompletedSnackBar = SnackBar(
-    content: Text('Purchase completed'),
+    content: Row(children: [Icon(Icons.tag_faces), Text(' Purchase completed')]),
+    backgroundColor: Colors.lightBlue,
+    duration: const Duration(seconds: 1),
+  );
+
+  var allowanceExceededSnackBar = SnackBar(
+    content: Row(children: [Icon(Icons.warning), Text(' Guest allowance exceeded')]),
+    backgroundColor: Colors.deepOrange,
     duration: const Duration(seconds: 1),
   );
 
@@ -84,11 +92,47 @@ class _MyHomePageState extends State<MyHomePage> {
   var commonBlackTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black);
   
   void addItem(String item) {
-    if (order.containsKey(item)) {
-      order[item] = (order[item]! + 1);
+
+    // For demo purposes I'm not counting adult soups against allowance, because there are several allowable combos and it gets a tad complicated.
+    var childItemsSoFar = order.entries.where((entry) => entry.key.endsWith("Child")).length;
+    var adultHotMealsSoFar = order["Hot Meal - Adult"] ?? 0;
+    var adultSoupsSoFar = order["Soup - Adult"] ?? 0;
+    var adultSandwichesSoFar = order.entries.where((item) => item.key.endsWith("Sandwich - Adult")).map((entry) => entry.value).sum;
+
+    var isAdultItem = item.endsWith("Adult");
+    var isAdultHotMeal = item == "Hot Meal - Adult";
+    var isAdultSoup = item == "Soup - Adult";
+    var isAdultSandwich = item.endsWith("Sandwich - Adult");
+
+    // print("childItemsSoFar: $childItemsSoFar");
+    // print("adultHotMealsSoFar: $adultHotMealsSoFar");
+    // print("adultSoupsSoFar: $adultSoupsSoFar");
+    // print("adultSandwichesSoFar: $adultSandwichesSoFar");
+
+    // print("isAdultItem: $isAdultItem");
+    // print("isAdultHotMeal: $isAdultHotMeal");
+    // print("isAdultSoup: $isAdultSoup");
+    // print("isAdultSandwich: $isAdultSandwich");
+
+    var allowAdd = (
+      (isAdultSoup && ((adultSoupsSoFar < adultHotMealsSoFar + adultSandwichesSoFar) || (adultHotMealsSoFar == 0 && adultSandwichesSoFar == 0 && adultSoupsSoFar < (adultAllowance! * 2))))
+      || (isAdultHotMeal && adultHotMealsSoFar + adultSandwichesSoFar < adultAllowance!)
+      || (isAdultSandwich && adultHotMealsSoFar + adultSandwichesSoFar < adultAllowance!)
+      || (!isAdultItem && childItemsSoFar < childAllowance!)
+    );
+
+    if (allowAdd) {
+      if (order.containsKey(item)) {
+        order[item] = (order[item]! + 1);
+      }
+      else {
+        order[item] = 1;
+      }
     }
     else {
-      order[item] = 1;
+      ScaffoldMessenger.of(context).showSnackBar(
+        allowanceExceededSnackBar
+      );
     }
   }
 
@@ -269,18 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: ElevatedButton( 
                         onPressed: () => {
                           if (order.isNotEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              purchaseCompletedSnackBar
-                            ),
-                            Future.delayed(const Duration(seconds: 1), () {
-                              _notesTextFieldController.text = "";
-                              _scanTextFieldController.text = "";
-                              setState(() {
-                                adultAllowance = null;
-                                childAllowance = null;
-                                order.clear();
-                              });
-                            })
+                            placeOrder()
                           }
                         }, 
                         style: ButtonStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.blue)),
@@ -291,15 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Flexible( // CANCEL BUTTON
                     flex: 1,
                     child: ElevatedButton(
-                      onPressed: () => {
-                          _notesTextFieldController.text = "",
-                          _scanTextFieldController.text = "",
-                          setState(() {
-                            adultAllowance = null;
-                            childAllowance = null;
-                            order.clear();
-                          })
-                      }, 
+                      onPressed: () => resetOrder(),
                       style: ButtonStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.grey)),
                       child: Text(style: commonBlackTextStyle, "Cancel"),
                     ),
@@ -326,6 +351,25 @@ class _MyHomePageState extends State<MyHomePage> {
         )
       )
     );
+  }
+
+  void resetOrder() {
+    _notesTextFieldController.text = "";
+    _scanTextFieldController.text = "";
+    setState(() {
+      adultAllowance = null;
+      childAllowance = null;
+      order.clear();
+    });
+  }
+
+  void placeOrder() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      purchaseCompletedSnackBar
+    );
+    Future.delayed(const Duration(seconds: 1), () {
+      resetOrder();
+    });
   }
 
   Flexible orderButtonBox(String widgetLabel, List<String> buttonLabels) {
