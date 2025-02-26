@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var commonBlackTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black);
   
   void addItem(String item) {
-    var childItemsSoFar = order.entries.where((entry) => entry.key.endsWith("Child")).length;
+    var childItemsSoFar = order.entries.where((item) => item.key.endsWith("Child")).map((entry) => entry.value).sum;
     var adultHotMealsSoFar = order["Hot Meal - Adult"] ?? 0;
     var adultSoupsSoFar = order["Soup - Adult"] ?? 0;
     var adultSandwichesSoFar = order.entries.where((item) => item.key.endsWith("Sandwich - Adult")).map((entry) => entry.value).sum;
