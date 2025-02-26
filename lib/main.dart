@@ -92,8 +92,6 @@ class _MyHomePageState extends State<MyHomePage> {
   var commonBlackTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black);
   
   void addItem(String item) {
-
-    // For demo purposes I'm not counting adult soups against allowance, because there are several allowable combos and it gets a tad complicated.
     var childItemsSoFar = order.entries.where((entry) => entry.key.endsWith("Child")).length;
     var adultHotMealsSoFar = order["Hot Meal - Adult"] ?? 0;
     var adultSoupsSoFar = order["Soup - Adult"] ?? 0;
